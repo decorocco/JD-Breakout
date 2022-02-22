@@ -9,6 +9,8 @@ public class MovimentoBola : MonoBehaviour
 
     private Vector3 direcao;
 
+    public bool startBola = false;
+
     GameManager gm;
 
     void Start()
@@ -26,21 +28,39 @@ public class MovimentoBola : MonoBehaviour
     {
         if (gm.gameState != GameManager.GameState.GAME) return;
 
-        transform.position += direcao * Time.deltaTime * velocidade;
-
-        Vector2 posicaoViewport = Camera.main.WorldToViewportPoint(transform.position);
-
-        if( posicaoViewport.x < 0 || posicaoViewport.x > 1 )
+        if (!startBola) 
         {
-            direcao = new Vector3(-direcao.x, direcao.y);
+            Vector3 playerPosition = GameObject.FindGameObjectWithTag("Player").transform.position;
+            transform.position = playerPosition + new Vector3(0, 0.5f, 0);
+            
+            if(Input.GetKeyDown(KeyCode.Space)){
+            float dirX = Random.Range(-5.0f, 5.0f);
+            float dirY = Random.Range(2.0f, 5.0f);
+            direcao = new Vector3(dirX, dirY).normalized;
+            startBola = true;
+            }
         }
-        if( posicaoViewport.y > 1 )
+        else 
         {
-            direcao = new Vector3(direcao.x, -direcao.y);
+            transform.position += direcao * Time.deltaTime * velocidade;
+
+            Vector2 posicaoViewport = Camera.main.WorldToViewportPoint(transform.position);
+
+            if( posicaoViewport.x < 0 || posicaoViewport.x > 1 )
+            {
+                direcao = new Vector3(-direcao.x, direcao.y);
+            }
+            if( posicaoViewport.y > 1 )
+            {
+                direcao = new Vector3(direcao.x, -direcao.y);
+            }
+            if( posicaoViewport.y < 0){
+                Reset();
+            }
         }
-        if( posicaoViewport.y < 0){
-            Reset();
-        }
+
+        
+        
 
         //Debug.Log($"Vidas: {gm.vidas} \t | \t Pontos: {gm.pontos}");
     }
